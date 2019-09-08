@@ -21,7 +21,7 @@ func New(client github.Client) *Checker {
 func (c *Checker) Check(ctx context.Context, sha string) error {
 	prs, err := c.client.ListPullRequestsWithCommit(ctx, sha)
 	if err != nil {
-		return err
+		panic(err)
 	}
 	pr := prs[0]
 	if err := c.checkPR(pr); err != nil {
@@ -29,7 +29,7 @@ func (c *Checker) Check(ctx context.Context, sha string) error {
 	}
 	commits, err := c.client.ListCommits(ctx, pr.Number)
 	if err != nil {
-		return err
+		panic(err)
 	}
 	for _, commit := range commits {
 		if err := c.checkCommit(commit); err != nil {

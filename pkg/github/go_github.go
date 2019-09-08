@@ -41,6 +41,45 @@ func (g *GoGithubClient) ListCommits(ctx context.Context, pullRequestNumber int)
 	return toCommits(commits), nil
 }
 
+func (g *GoGithubClient) filterLabelsByName(labels []*github.Label, name string) []*github.Label {
+	results := make([]*github.Label, 0, len(labels))
+	for _, label := range labels {
+		if label.GetName() == name {
+			continue
+		}
+		results = append(results, label)
+	}
+	return results
+}
+
+func (g *GoGithubClient) AddLabel(ctx context.Context, pullRequestNumber int, label Label) error {
+	pr, _, err := g.client.PullRequests.Get(ctx, g.owner, g.repo, pullRequestNumber)
+	if err != nil {
+		return err
+	}
+	labels := make([]*github.Label, 0, len(pr.Labels))
+	for _, label := range pr.Labels {
+		if label.GetName() == label.Name {
+			continue
+		}
+		labels = append(labels, label)
+	}
+	pr.Labels = g.filterLabelsByName(pr.Labels, label.Name)
+	pr.Labels = append(pr.Labels, toGithubLabel(label))
+	_, _, err = g.client.PullRequests.Edit(ctx, g.owner, g.repo, pullRequestNumber, pr)
+	return err
+}
+
+func (g *GoGithubClient) RemoveLabel(ctx context.Context, pullRequestNumber int, label Label) error {
+	pr, _, err := g.client.PullRequests.Get(ctx, g.owner, g.repo, pullRequestNumber)
+	if err != nil {
+		return err
+	}
+	pr.Labels = g.filterLabelsByName(pr.Labels, label.Name)
+	_, _, err = g.client.PullRequests.Edit(ctx, g.owner, g.repo, pullRequestNumber, pr)
+	return err
+}
+
 func toPullRequests(prs []*github.PullRequest) []PullRequest {
 	result := make([]PullRequest, len(prs))
 	for i, pr := range prs {

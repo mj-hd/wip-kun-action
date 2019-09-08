@@ -8,6 +8,8 @@ import "context"
 type Client interface {
 	ListPullRequestsWithCommit(ctx context.Context, sha string) ([]PullRequest, error)
 	ListCommits(ctx context.Context, pullRequestNumber int) ([]Commit, error)
+	AddLabel(ctx context.Context, pullRequestNumber int, label Label) error
+	RemoveLabel(ctx context.Context, pullRequestNumber int, label Label) error
 }
 
 type Label struct {
