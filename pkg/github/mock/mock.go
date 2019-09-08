@@ -63,3 +63,31 @@ func (mr *MockClientMockRecorder) ListCommits(ctx, pullRequestNumber interface{}
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListCommits", reflect.TypeOf((*MockClient)(nil).ListCommits), ctx, pullRequestNumber)
 }
+
+// AddLabel mocks base method
+func (m *MockClient) AddLabel(ctx context.Context, pullRequestNumber int, label github.Label) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddLabel", ctx, pullRequestNumber, label)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddLabel indicates an expected call of AddLabel
+func (mr *MockClientMockRecorder) AddLabel(ctx, pullRequestNumber, label interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddLabel", reflect.TypeOf((*MockClient)(nil).AddLabel), ctx, pullRequestNumber, label)
+}
+
+// RemoveLabel mocks base method
+func (m *MockClient) RemoveLabel(ctx context.Context, pullRequestNumber int, label github.Label) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveLabel", ctx, pullRequestNumber, label)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveLabel indicates an expected call of RemoveLabel
+func (mr *MockClientMockRecorder) RemoveLabel(ctx, pullRequestNumber, label interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveLabel", reflect.TypeOf((*MockClient)(nil).RemoveLabel), ctx, pullRequestNumber, label)
+}

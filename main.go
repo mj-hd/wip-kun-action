@@ -14,13 +14,22 @@ func main() {
 	ctx := context.Background()
 	conf, err := config.New()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		panic(err)
 	}
 	client := github.NewGoGithub(ctx, conf)
-	checker := checker.New(client)
-	if err := checker.Check(ctx, conf.GithubSHA); err != nil {
+	checker, err := checker.New(ctx, client, conf.GithubSHA)
+	if err != nil {
+		panic(err)
+	}
+	wip := false
+	if err := checker.Check(ctx); err != nil {
+		wip = true
 		fmt.Println(err)
+	}
+	if err := checker.EnsureLabel(ctx, wip, conf.WIPLabel); err != nil {
+		panic(err)
+	}
+	if wip {
 		os.Exit(1)
 	}
 }

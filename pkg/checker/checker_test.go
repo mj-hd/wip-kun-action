@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestChecker(t *testing.T) {
+func TestCheckerCheck(t *testing.T) {
 	pr := github.PullRequest{
 		Number: 1,
 		Title:  "Title",
@@ -69,8 +69,63 @@ func TestChecker(t *testing.T) {
 			defer ctrl.Finish()
 			client := mock.NewMockClient(ctrl)
 			testcase.setup(client)
-			checker := New(client)
-			require.Equal(t, testcase.expectErr, checker.Check(ctx, testcase.sha) != nil)
+			checker, err := New(ctx, client, testcase.sha)
+			require.NoError(t, err)
+			err = checker.Check(ctx)
+			if testcase.expectErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+		}
+		t.Run(title, test)
+	}
+}
+
+func TestCheckerEnsureLabel(t *testing.T) {
+	pr := github.PullRequest{
+		Number: 1,
+		Title:  "Title",
+	}
+	wipLabel := "work-in-progress"
+	testcases := map[string]struct {
+		setup    func(client *mock.MockClient)
+		sha      string
+		wip      bool
+		wipLabel string
+	}{
+		"add wip": {
+			setup: func(client *mock.MockClient) {
+				client.EXPECT().ListPullRequestsWithCommit(gomock.Any(), "sha").Return([]github.PullRequest{pr}, nil)
+				client.EXPECT().AddLabel(gomock.Any(), pr.Number, github.Label{Name: wipLabel})
+			},
+			sha:      "sha",
+			wip:      true,
+			wipLabel: wipLabel,
+		},
+		"remove wip": {
+			setup: func(client *mock.MockClient) {
+				client.EXPECT().ListPullRequestsWithCommit(gomock.Any(), "sha").Return([]github.PullRequest{pr}, nil)
+				client.EXPECT().RemoveLabel(gomock.Any(), pr.Number, github.Label{Name: wipLabel})
+			},
+			sha:      "sha",
+			wip:      false,
+			wipLabel: wipLabel,
+		},
+	}
+	for title, testcase := range testcases {
+		testcase := testcase
+		test := func(t *testing.T) {
+			t.Parallel()
+			ctx := context.Background()
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			client := mock.NewMockClient(ctrl)
+			testcase.setup(client)
+			checker, err := New(ctx, client, testcase.sha)
+			require.NoError(t, err)
+			err = checker.EnsureLabel(ctx, testcase.wip, testcase.wipLabel)
+			require.NoError(t, err)
 		}
 		t.Run(title, test)
 	}

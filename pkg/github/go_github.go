@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/go-github/v28/github"
 	"github.com/mjhd-devlion/wip-kun/pkg/config"
@@ -57,15 +58,12 @@ func (g *GoGithubClient) AddLabel(ctx context.Context, pullRequestNumber int, la
 	if err != nil {
 		return err
 	}
-	labels := make([]*github.Label, 0, len(pr.Labels))
-	for _, label := range pr.Labels {
-		if label.GetName() == label.Name {
-			continue
-		}
-		labels = append(labels, label)
+	ghLabel, err := g.getLabel(ctx, label)
+	if err != nil {
+		return err
 	}
 	pr.Labels = g.filterLabelsByName(pr.Labels, label.Name)
-	pr.Labels = append(pr.Labels, toGithubLabel(label))
+	pr.Labels = append(pr.Labels, ghLabel)
 	_, _, err = g.client.PullRequests.Edit(ctx, g.owner, g.repo, pullRequestNumber, pr)
 	return err
 }
@@ -78,6 +76,20 @@ func (g *GoGithubClient) RemoveLabel(ctx context.Context, pullRequestNumber int,
 	pr.Labels = g.filterLabelsByName(pr.Labels, label.Name)
 	_, _, err = g.client.PullRequests.Edit(ctx, g.owner, g.repo, pullRequestNumber, pr)
 	return err
+}
+
+func (g *GoGithubClient) getLabel(ctx context.Context, label Label) (*github.Label, error) {
+	labels, _, err := g.client.Issues.ListLabels(ctx, g.owner, g.repo, nil)
+	if err != nil {
+		return nil, err
+	}
+	for _, ghLabel := range labels {
+		if ghLabel.GetName() != label.Name {
+			continue
+		}
+		return ghLabel, nil
+	}
+	return nil, errors.New("github: no such Label")
 }
 
 func toPullRequests(prs []*github.PullRequest) []PullRequest {
