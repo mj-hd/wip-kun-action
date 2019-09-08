@@ -41,6 +41,9 @@ func (c *Checker) Check(ctx context.Context) error {
 }
 
 func (c *Checker) EnsureLabel(ctx context.Context, wip bool, wipLabel string) error {
+	if len(wipLabel) == 0 {
+		return nil
+	}
 	if wip {
 		return c.client.AddLabel(ctx, c.pr.Number, github.Label{Name: wipLabel})
 	}

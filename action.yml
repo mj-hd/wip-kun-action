@@ -1,0 +1,25 @@
+name: WIP-kun
+author: Yusuke Otsuka <mjhd.devlion@gmail.com>
+description: manage your PRs with WIP labels
+inputs:
+  token:
+    description: github auth token
+    required: true
+  owner:
+    description: github repository owner
+    required: true
+  repo:
+    description: github repository name
+    required: true
+  sha:
+    description: sha of commit to check WIP
+    required: true
+  label:
+    description: name of WIP Label
+    required: false
+    default: ''
+using: docker
+image: Dockerfile
+branding:
+  icon: shield-off
+  color: yellow

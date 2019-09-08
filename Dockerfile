@@ -8,9 +8,4 @@ FROM alpine
 RUN apk add --no-cache ca-certificates
 COPY --from=build /wip-kun /wip-kun
 
-LABEL "com.github.actions.name"="WIP-kun"
-LABEL "com.github.actions.description"="manage your pull requests with WIP label"
-LABEL "com.github.actions.icon"="shield-off"
-LABEL "com.github.actions.color"="yellow"
-
 ENTRYPOINT ["/wip-kun"]
