@@ -2,7 +2,6 @@ package github
 
 import (
 	"context"
-	"errors"
 
 	"github.com/google/go-github/v28/github"
 	"github.com/mjhd-devlion/wip-kun/pkg/config"
@@ -42,54 +41,14 @@ func (g *GoGithubClient) ListCommits(ctx context.Context, pullRequestNumber int)
 	return toCommits(commits), nil
 }
 
-func (g *GoGithubClient) filterLabelsByName(labels []*github.Label, name string) []*github.Label {
-	results := make([]*github.Label, 0, len(labels))
-	for _, label := range labels {
-		if label.GetName() == name {
-			continue
-		}
-		results = append(results, label)
-	}
-	return results
-}
-
 func (g *GoGithubClient) AddLabel(ctx context.Context, pullRequestNumber int, label Label) error {
-	pr, _, err := g.client.PullRequests.Get(ctx, g.owner, g.repo, pullRequestNumber)
-	if err != nil {
-		return err
-	}
-	ghLabel, err := g.getLabel(ctx, label)
-	if err != nil {
-		return err
-	}
-	pr.Labels = g.filterLabelsByName(pr.Labels, label.Name)
-	pr.Labels = append(pr.Labels, ghLabel)
-	_, _, err = g.client.PullRequests.Edit(ctx, g.owner, g.repo, pullRequestNumber, pr)
+	_, _, err := g.client.Issues.AddLabelsToIssue(ctx, g.owner, g.repo, pullRequestNumber, []string{label.Name})
 	return err
 }
 
 func (g *GoGithubClient) RemoveLabel(ctx context.Context, pullRequestNumber int, label Label) error {
-	pr, _, err := g.client.PullRequests.Get(ctx, g.owner, g.repo, pullRequestNumber)
-	if err != nil {
-		return err
-	}
-	pr.Labels = g.filterLabelsByName(pr.Labels, label.Name)
-	_, _, err = g.client.PullRequests.Edit(ctx, g.owner, g.repo, pullRequestNumber, pr)
+	_, err := g.client.Issues.RemoveLabelForIssue(ctx, g.owner, g.repo, pullRequestNumber, label.Name)
 	return err
-}
-
-func (g *GoGithubClient) getLabel(ctx context.Context, label Label) (*github.Label, error) {
-	labels, _, err := g.client.Issues.ListLabels(ctx, g.owner, g.repo, nil)
-	if err != nil {
-		return nil, err
-	}
-	for _, ghLabel := range labels {
-		if ghLabel.GetName() != label.Name {
-			continue
-		}
-		return ghLabel, nil
-	}
-	return nil, errors.New("github: no such Label")
 }
 
 func toPullRequests(prs []*github.PullRequest) []PullRequest {
