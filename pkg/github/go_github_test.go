@@ -10,23 +10,40 @@ import (
 func TestToPullRequests(t *testing.T) {
 	prTitle1 := "PR1"
 	prTitle2 := "PR2"
+	labelName := "WIP"
 	prNumber1 := 1
 	prNumber2 := 2
 	target := []*github.PullRequest{
 		{
 			Number: &prNumber1,
 			Title:  &prTitle1,
+			Labels: []*github.Label{
+				{
+					Name: &labelName,
+				},
+			},
+		},
+		{
+			Number: &prNumber2,
+			Title:  &prTitle2,
 			Labels: nil,
 		},
 	}
 	expect := []PullRequest{
 		{
+			Number: prNumber1,
+			Title:  prTitle1,
+			Labels: []Label{
+				{Name: labelName},
+			},
+		},
+		{
 			Number: prNumber2,
 			Title:  prTitle2,
-			Labels: nil,
+			Labels: []Label{},
 		},
 	}
-	require.Equal(t, toPullRequests(target), expect)
+	require.Equal(t, expect, toPullRequests(target))
 }
 
 func TestToCommits(t *testing.T) {
@@ -58,5 +75,5 @@ func TestToCommits(t *testing.T) {
 			Message: commitMessage2,
 		},
 	}
-	require.Equal(t, toCommits(target), expect)
+	require.Equal(t, expect, toCommits(target))
 }
