@@ -2,6 +2,8 @@ package checker
 
 import (
 	"context"
+	"errors"
+	"strings"
 
 	"github.com/mjhd-devlion/wip-kun/pkg/github"
 )
@@ -22,37 +24,36 @@ func (c *Checker) Check(ctx context.Context, sha string) error {
 		return err
 	}
 	pr := prs[0]
-	if checkPR(pr) {
-		return errors.New("still WIP!")
+	if err := c.checkPR(pr); err != nil {
+		return err
 	}
 	commits, err := c.client.ListCommits(ctx, pr.Number)
 	if err != nil {
 		return err
 	}
 	for _, commit := range commits {
-		if checkCommit(commit) {
-		  return errors.New("failed to check commit")
+		if err := c.checkCommit(commit); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *Checker) checkPR(pr github.PullRequest) bool {
-	if (strings.HasPrefix(pr.Title, "WIP")) {
-		return true
+func (c *Checker) checkPR(pr github.PullRequest) error {
+	title := strings.ToLower(pr.Title)
+	if strings.HasPrefix(title, "wip") {
+		return errors.New("PR title contains WIP")
 	}
-	return false
+	return nil
 }
 
-func (c *Checker) checkCommit(commit github.Commit) bool {
-	if (strings.HasPrefix(commit.Message, "fixup!")) {
-		return true
+func (c *Checker) checkCommit(commit github.Commit) error {
+	message := strings.ToLower(commit.Message)
+	if strings.HasPrefix(message, "fixup!") {
+		return errors.New("fixup commit found")
 	}
-	if (strings.HasPrefix(commit.Message, "WIP")) {\
-		return true
+	if strings.HasPrefix(message, "wip") {
+		return errors.New("WIP commit found")
 	}
-	if (strings.HasPrefix(commit.Message, "wip")) {\
-		return true
-	}
-	return false
+	return nil
 }

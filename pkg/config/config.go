@@ -12,5 +12,5 @@ type Config struct {
 
 func New() (*Config, error) {
 	conf := &Config{}
-	return conf, envconfig.Process("", &conf)
+	return conf, envconfig.Process("", conf)
 }

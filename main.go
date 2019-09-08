@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"os"
 
 	"github.com/mjhd-devlion/wip-kun/pkg/checker"
 	"github.com/mjhd-devlion/wip-kun/pkg/config"
@@ -12,11 +14,13 @@ func main() {
 	ctx := context.Background()
 	conf, err := config.New()
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
-	client := github.NewOctokit(ctx, conf)
+	client := github.NewGoGithub(ctx, conf)
 	checker := checker.New(client)
 	if err := checker.Check(ctx, conf.GithubSHA); err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 }

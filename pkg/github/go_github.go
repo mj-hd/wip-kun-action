@@ -15,7 +15,7 @@ type GoGithubClient struct {
 }
 
 func NewGoGithub(ctx context.Context, conf *config.Config) Client {
-	ts := oauth2.StaticTokenSource(&oauth2.Token{conf.GithubToken})
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: conf.GithubToken})
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 	return &GoGithubClient{
@@ -51,8 +51,8 @@ func toPullRequests(prs []*github.PullRequest) []PullRequest {
 
 func toPullRequest(pr *github.PullRequest) PullRequest {
 	return PullRequest{
-		Number: *pr.Number,
-		Title:  *pr.Title,
+		Number: pr.GetNumber(),
+		Title:  pr.GetTitle(),
 		Labels: toLabels(pr.Labels),
 	}
 }
@@ -66,7 +66,7 @@ func toLabels(labels []*github.Label) []Label {
 }
 
 func toLabel(label *github.Label) Label {
-	return Label{Name: *label.Name}
+	return Label{Name: label.GetName()}
 }
 
 func toCommits(commits []*github.RepositoryCommit) []Commit {
@@ -79,7 +79,7 @@ func toCommits(commits []*github.RepositoryCommit) []Commit {
 
 func toCommit(commit *github.RepositoryCommit) Commit {
 	return Commit{
-		SHA:     *commit.Commit.SHA,
-		Message: *commit.Commit.Message,
+		SHA:     commit.Commit.GetSHA(),
+		Message: commit.Commit.GetMessage(),
 	}
 }
