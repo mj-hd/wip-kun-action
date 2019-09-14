@@ -1,8 +1,10 @@
-name: CI
+name: WIP君
 
 on:
   pull_request:
-    types: [assigned,unassigned、labeled,unlabeled,opened,edited,closed,reopened,synchronize,ready_for_review,locked,unlocked]
+    branches:
+      - '!master'
+    types: [labeled,unlabeled,opened,edited,reopened,synchronize]
 
 jobs:
   build:
@@ -14,3 +16,12 @@ jobs:
       run: printenv
     - name: run
       run: cat $GITHUB_EVENT_PATH
+    - name: WIP君
+      uses: mjhd-devlion/wip-kun-action@master
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        owner: mjhd-devlion
+        repo: wip-kun-action
+        label: 'work-in-progress'
+        title: 'WIP:'
+        commits: 'wip,fixup!'
