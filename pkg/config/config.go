@@ -7,7 +7,7 @@ import (
 )
 
 type Config struct {
-	GithubToken     string `envconfig:"GITHUB_TOKEN"`
+	GithubToken     string `envconfig:"INPUT_TOKEN"`
 	GithubEventName string `envconfig:"GITHUB_EVENT_NAME"`
 	GithubEventPath string `envconfig:"GITHUB_EVENT_PATH"`
 	GithubRepo      string `envconfig:"INPUT_REPO"`
