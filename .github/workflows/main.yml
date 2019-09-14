@@ -10,3 +10,5 @@ jobs:
     steps:
     - name: Run a one-line script
       run: printenv
+    - name: run
+      run: cat $GITHUB_EVENT_PATH
