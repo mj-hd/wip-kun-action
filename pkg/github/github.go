@@ -26,3 +26,15 @@ type Commit struct {
 	SHA     string
 	Message string
 }
+
+type EventType int
+
+const (
+	EVENT_TYPE_PULL_REQUEST EventType = iota
+	EVENT_TYPE_PUSH
+)
+
+type Event struct {
+	Type EventType
+	PR   PullRequest
+}

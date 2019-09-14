@@ -3,14 +3,22 @@ package config
 import "github.com/kelseyhightower/envconfig"
 
 type Config struct {
-	GithubToken string `envconfig:"TOKEN"`
-	GithubSHA   string `envconfig:"SHA"`
-	GithubRepo  string `envconfig:"REPO"`
-	GithubOwner string `envconfig:"OWNER"`
-	WIPLabel    string `envconfig:"LABEL"`
+	GithubToken     string `envconfig:"INPUT_TOKEN"`
+	GithubRef       string `envconfig:"GITHUB_HEAD_REF"`
+	GithubEventName string `envconfig:"GITHUB_EVENT_NAME"`
+	GithubEventPath string `envconfig:"GITHUB_EVENT_PATH"`
+	GithubRepo      string `envconfig:"INPUT_REPO"`
+	GithubOwner     string `envconfig:"INPUT_OWNER"`
+	WIPLabel        string `envconfig:"INPUT_LABEL"`
+	WIPTitle        string `envconfig:"INPUT_TITLE"`
+	wipCommits      string `envconfig:"INPUT_COMMITS"`
 }
 
 func New() (*Config, error) {
 	conf := &Config{}
-	return conf, envconfig.Process("INPUT", conf)
+	return conf, envconfig.Process("", conf)
+}
+
+func (c *Config) WIPCommits() string[] {
+	return strings.Split(c.wipCommits, ",")
 }

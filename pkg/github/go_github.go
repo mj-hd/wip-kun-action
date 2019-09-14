@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/google/go-github/v28/github"
-	"github.com/mjhd-devlion/wip-kun/pkg/config"
 	"golang.org/x/oauth2"
 )
 
@@ -14,14 +13,14 @@ type GoGithubClient struct {
 	owner  string
 }
 
-func NewGoGithub(ctx context.Context, conf *config.Config) Client {
-	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: conf.GithubToken})
+func NewGoGithub(ctx context.Context, token, owner, repo string) Client {
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 	return &GoGithubClient{
 		client: client,
-		repo:   conf.GithubRepo,
-		owner:  conf.GithubOwner,
+		repo:   repo,
+		owner:  owner,
 	}
 }
 
@@ -49,6 +48,24 @@ func (g *GoGithubClient) AddLabel(ctx context.Context, pullRequestNumber int, la
 func (g *GoGithubClient) RemoveLabel(ctx context.Context, pullRequestNumber int, label Label) error {
 	_, err := g.client.Issues.RemoveLabelForIssue(ctx, g.owner, g.repo, pullRequestNumber, label.Name)
 	return err
+}
+
+func NewEvent(typ string, data bytes[]) (Event, error) {
+	event, err := github.ParseWebHook(typ, data)
+	if err != nil {
+		return Event{}, err
+	}
+	switch event.(type) {
+	case *github.PullRequestEvent:
+		return Event{
+			Type: EEVENT_TYPE_PULL_REQUEST,
+		}, nil
+	case *github.PushEvent:
+		return Event{
+			Type: EEVENT_TYPE_PUSH,
+		}, nil
+	}
+	return return Event{}, errors.New("github: unsupported event type")
 }
 
 func toPullRequests(prs []*github.PullRequest) []PullRequest {

@@ -11,13 +11,22 @@ inputs:
   repo:
     description: github repository name
     required: true
-  sha:
-    description: sha of commit to check WIP
-    required: true
+  targets:
+   description: target to watch changes
+   required: false
+   default: 'label,title,commits'
   label:
     description: name of WIP Label
     required: false
-    default: ''
+    default: 'S-work-in-progress'
+  title:
+    description: WIP title prefix
+    required: false
+    default: 'WIP:'
+  commits:
+    description: WIP commit prefixes
+    required: false
+    default: 'fixup!,squash!,wip'
 runs:
   using: docker
   image: Dockerfile

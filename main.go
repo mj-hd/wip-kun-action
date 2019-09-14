@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/mjhd-devlion/wip-kun/pkg/checker"
@@ -16,20 +16,23 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	client := github.NewGoGithub(ctx, conf)
-	checker, err := checker.New(ctx, client, conf.GithubSHA)
+	client := github.NewGoGithub(ctx, conf.GithubToken, conf.GithubOwner, conf.GithubRepo)
+	file, err := os.Open(conf.GithubEventPath)
 	if err != nil {
 		panic(err)
 	}
-	wip := false
-	if err := checker.Check(ctx); err != nil {
-		wip = true
-		fmt.Println(err)
-	}
-	if err := checker.EnsureLabel(ctx, wip, conf.WIPLabel); err != nil {
+	defer file.Close()
+	bytes, err := ioutil.ReadAll(file)
+	if err != nil {
 		panic(err)
 	}
-	if wip {
-		os.Exit(1)
+	event, err := github.NewEvent(conf.GithubEventName, bytes)
+	if err != nil {
+		panic(err)
+	}
+	checker := checker.New(ctx, client)
+	wip, err := checker.Check(ctx, event, conf.GithubRef)
+	if err != nil {
+		panic(err)
 	}
 }

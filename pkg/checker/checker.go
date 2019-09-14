@@ -5,66 +5,76 @@ import (
 	"errors"
 	"strings"
 
+	go_github "github.com/google/go-github/v28/github"
 	"github.com/mjhd-devlion/wip-kun/pkg/github"
 )
 
 type Checker struct {
 	client github.Client
-	pr     github.PullRequest
+	config *config.Config
 }
 
-func New(ctx context.Context, client github.Client, sha string) (*Checker, error) {
-	prs, err := client.ListPullRequestsWithCommit(ctx, sha)
-	if err != nil {
-		return nil, err
-	}
+func New(ctx context.Context, client github.Client, config *config.Config) *Checker {
 	return &Checker{
 		client: client,
-		pr:     prs[0],
-	}, nil
+		config: config,
+	}
 }
 
-func (c *Checker) Check(ctx context.Context, diff string) error {
-	if err := c.checkPR(); err != nil {
-		return err
-	}
-	commits, err := c.client.ListCommits(ctx, c.pr.Number)
+type WIPStatus struct {
+	hasWIPTitle   bool
+	hasWIPCommits bool
+	hasWIPLabel   bool
+}
+
+func (c *Checker) Check(ctx context.Context, event github.Event, ref string) (status WIPStatus, err error) {
+
+	var pr 
+	status.hasWIPTitle = c.checkPR(pr)
+	status.hasWIPLabel = c.checkLabels(pr)
+	commits, err := c.client.ListCommits(ctx, prNumber)
 	if err != nil {
-		panic(err)
+		return
 	}
+	status.hasWIPCommits = c.checkCommits(commits)
+	return
+}
+
+func (c *Checker) checkPR(pr github.PullRequest) bool {
+	title := strings.ToLower(pr.Title)
+	if !strings.HasPrefix(pr.Title, c.config.WIPTitle) {
+		return false
+	}
+	return true
+}
+
+func (c *Checker) checkCommits(commit []github.Commit) bool {
 	for _, commit := range commits {
-		if err := c.checkCommit(commit); err != nil {
-			return err
+		if !c.checkCommit(commit) {
+			continue
 		}
+		return true
 	}
-	return nil
+	return false
 }
 
-func (c *Checker) EnsureLabel(ctx context.Context, wip bool, wipLabel string) error {
-	if len(wipLabel) == 0 {
-		return nil
-	}
-	if wip {
-		return c.client.AddLabel(ctx, c.pr.Number, github.Label{Name: wipLabel})
-	}
-	return c.client.RemoveLabel(ctx, c.pr.Number, github.Label{Name: wipLabel})
-}
-
-func (c *Checker) checkPR() error {
-	title := strings.ToLower(c.pr.Title)
-	if strings.HasPrefix(title, "wip") {
-		return errors.New("checker: PR title contains WIP")
-	}
-	return nil
-}
-
-func (c *Checker) checkCommit(commit github.Commit) error {
+func (c *Checker) checkCommit(commit github.Commit) bool {
 	message := strings.ToLower(commit.Message)
-	if strings.HasPrefix(message, "fixup!") {
-		return errors.New("checker: fixup commit found")
+	for _, prefix := range c.config.WIPCommits() {
+		if !strings.HasPrefix(message, prefix) {
+			continue
+		}
+		return true
 	}
-	if strings.HasPrefix(message, "wip") {
-		return errors.New("checker: WIP commit found")
+	return false
+}
+
+func (c *Checker) checkLabels(pr github.PullRequest) bool {
+	for _, label := range pr.Labels {
+		if label.Name != c.config.WIPLabel {
+			continue
+		}
+		return true
 	}
-	return nil
+	return false
 }
