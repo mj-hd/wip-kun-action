@@ -72,7 +72,7 @@ func (m *Maintainer) maintainOpened(ctx context.Context, e github.Event, status 
 }
 
 func (m *Maintainer) maintainEdited(ctx context.Context, e github.Event, status check.WIPStatus) error {
-	if e.Title == nil {
+	if e.ChangedTitle == nil {
 		return nil
 	}
 	if status.HasWIPTitle {
@@ -88,7 +88,7 @@ func (m *Maintainer) maintainEdited(ctx context.Context, e github.Event, status 
 }
 
 func (m *Maintainer) maintainLabeled(ctx context.Context, e github.Event, status check.WIPStatus) error {
-	if e.Label == nil || e.Label.Name != m.config.WIPLabel {
+	if e.ChangedLabel == nil || e.ChangedLabel.Name != m.config.WIPLabel {
 		return nil
 	}
 	if !status.HasWIPTitle {
@@ -100,16 +100,13 @@ func (m *Maintainer) maintainLabeled(ctx context.Context, e github.Event, status
 }
 
 func (m *Maintainer) maintainUnlabeled(ctx context.Context, e github.Event, status check.WIPStatus) error {
-	if e.Label == nil || e.Label.Name != m.config.WIPLabel {
+	if e.ChangedLabel == nil || e.ChangedLabel.Name != m.config.WIPLabel {
 		return nil
 	}
 	if status.HasWIPCommits {
 		return m.reject(ctx, e, status)
 	}
-	if err := m.removeTitle(ctx, e.PR); err != nil {
-		return err
-	}
-	return nil
+	return m.removeTitle(ctx, e.PR);
 }
 
 func (m *Maintainer) maintainSynchronized(ctx context.Context, e github.Event, status check.WIPStatus) error {
