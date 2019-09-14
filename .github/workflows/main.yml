@@ -3,7 +3,7 @@ name: CI
 on:
   push:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [assigned,unassigned、labeled,unlabeled,opened,edited,closed,reopened,synchronize,ready_for_review,locked,unlocked]
 
 jobs:
   build:
