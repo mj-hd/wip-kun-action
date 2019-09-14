@@ -36,7 +36,10 @@ const (
 	EVENT_TYPE_EDITED
 )
 
+// TODO simplify
 type Event struct {
-	Type EventType
-	PR   PullRequest
+	Type  EventType
+	PR    PullRequest
+	Label *Label
+	Title *string
 }

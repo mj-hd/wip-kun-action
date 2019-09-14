@@ -63,12 +63,17 @@ func NewEvent(typ string, data []byte) (Event, error) {
 	return Event{}, errors.New("github: unsupported event type")
 }
 
-func toPullRequestEvent(e *github.PullRequestEvent) (Event, error) {
-	typ, err := toEventType(e.GetAction())
-	return Event{
-		Type: typ,
-		PR:   toPullRequest(e.GetPullRequest()),
-	}, err
+func toPullRequestEvent(e *github.PullRequestEvent) (event Event, err error) {
+	event.PR = toPullRequest(e.GetPullRequest())
+	event.Type, err = toEventType(e.GetAction())
+	if e.GetLabel() != nil {
+		label := toLabel(e.GetLabel())
+		event.Label = &label
+	}
+	if e.GetChanges() != nil && e.GetChanges().Title != nil {
+		event.Title = e.GetChanges().Title.From
+	}
+	return
 }
 
 func toEventType(action string) (EventType, error) {

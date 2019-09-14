@@ -31,7 +31,6 @@ func (w WIPStatus) WIP() bool {
 }
 
 func (c *Checker) Check(ctx context.Context, event github.Event) (status WIPStatus, err error) {
-
 	status.HasWIPTitle = c.checkPR(event.PR)
 	status.HasWIPLabel = c.checkLabels(event.PR)
 	commits, err := c.client.ListCommits(ctx, event.PR.Number)
@@ -43,11 +42,9 @@ func (c *Checker) Check(ctx context.Context, event github.Event) (status WIPStat
 }
 
 func (c *Checker) checkPR(pr github.PullRequest) bool {
+	prefix := strings.ToLower(c.config.WIPTitle)
 	title := strings.ToLower(pr.Title)
-	if !strings.HasPrefix(title, c.config.WIPTitle) {
-		return false
-	}
-	return true
+	return strings.HasPrefix(title, prefix)
 }
 
 func (c *Checker) checkCommits(commits []github.Commit) bool {
@@ -63,7 +60,7 @@ func (c *Checker) checkCommits(commits []github.Commit) bool {
 func (c *Checker) checkCommit(commit github.Commit) bool {
 	message := strings.ToLower(commit.Message)
 	for _, prefix := range c.config.WIPCommits() {
-		if !strings.HasPrefix(message, prefix) {
+		if !strings.HasPrefix(message, strings.ToLower(prefix)) {
 			continue
 		}
 		return true
