@@ -20,6 +20,7 @@ type PullRequest struct {
 	Number int
 	Title  string
 	Labels []Label
+	Opened bool
 }
 
 type Commit struct {

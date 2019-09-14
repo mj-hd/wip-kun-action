@@ -22,6 +22,9 @@ func NewMaintainer(client github.Client, config *config.Config) *Maintainer {
 }
 
 func (m *Maintainer) Maintain(ctx context.Context, event github.Event, status check.WIPStatus) (err error) {
+	if !event.PR.Opened {
+		return nil
+	}
 	var f func(context.Context, github.Event, check.WIPStatus) error
 	switch event.Type {
 	case github.EVENT_TYPE_OPENED:

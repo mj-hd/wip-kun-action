@@ -105,6 +105,7 @@ func toPullRequest(pr *github.PullRequest) PullRequest {
 		Number: pr.GetNumber(),
 		Title:  pr.GetTitle(),
 		Labels: toLabels(pr.Labels),
+		Opened: pr.GetState() == "open",
 	}
 }
 
