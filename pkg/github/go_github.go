@@ -2,9 +2,9 @@ package github
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/go-github/v28/github"
-	"github.com/mjhd-devlion/wip-kun/pkg/config"
 	"golang.org/x/oauth2"
 )
 
@@ -14,14 +14,14 @@ type GoGithubClient struct {
 	owner  string
 }
 
-func NewGoGithub(ctx context.Context, conf *config.Config) Client {
-	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: conf.GithubToken})
+func NewGoGithub(ctx context.Context, token, owner, repo string) Client {
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 	return &GoGithubClient{
 		client: client,
-		repo:   conf.GithubRepo,
-		owner:  conf.GithubOwner,
+		repo:   repo,
+		owner:  owner,
 	}
 }
 
@@ -49,6 +49,42 @@ func (g *GoGithubClient) AddLabel(ctx context.Context, pullRequestNumber int, la
 func (g *GoGithubClient) RemoveLabel(ctx context.Context, pullRequestNumber int, label Label) error {
 	_, err := g.client.Issues.RemoveLabelForIssue(ctx, g.owner, g.repo, pullRequestNumber, label.Name)
 	return err
+}
+
+func NewEvent(typ string, data []byte) (Event, error) {
+	event, err := github.ParseWebHook(typ, data)
+	if err != nil {
+		return Event{}, err
+	}
+	switch e := event.(type) {
+	case *github.PullRequestEvent:
+		return toPullRequestEvent(e)
+	}
+	return Event{}, errors.New("github: unsupported event type")
+}
+
+func toPullRequestEvent(e *github.PullRequestEvent) (Event, error) {
+	typ, err := toEventType(e.GetAction())
+	return Event{
+		Type: typ,
+		PR:   toPullRequest(e.GetPullRequest()),
+	}, err
+}
+
+func toEventType(action string) (EventType, error) {
+	switch action {
+	case "opened", "reopened":
+		return EVENT_TYPE_OPENED, nil
+	case "edited":
+		return EVENT_TYPE_EDITED, nil
+	case "labeled":
+		return EVENT_TYPE_LABELED, nil
+	case "unlabeled":
+		return EVENT_TYPE_UNLABELED, nil
+	case "synchronized":
+		return EVENT_TYPE_SYNCHRONIZED, nil
+	}
+	return 0, errors.New("github: unsupported pull request event")
 }
 
 func toPullRequests(prs []*github.PullRequest) []PullRequest {
