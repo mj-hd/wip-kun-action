@@ -30,8 +30,11 @@ type Commit struct {
 type EventType int
 
 const (
-	EVENT_TYPE_PULL_REQUEST EventType = iota
-	EVENT_TYPE_PUSH
+	EVENT_TYPE_OPENED EventType = iota
+	EVENT_TYPE_SYNCHRONIZED
+	EVENT_TYPE_LABELED
+	EVENT_TYPE_UNLABELED
+	EVENT_TYPE_EDITED
 )
 
 type Event struct {

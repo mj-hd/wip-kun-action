@@ -1,11 +1,10 @@
-package checker
+package check
 
 import (
 	"context"
-	"errors"
 	"strings"
 
-	go_github "github.com/google/go-github/v28/github"
+	"github.com/mjhd-devlion/wip-kun/pkg/config"
 	"github.com/mjhd-devlion/wip-kun/pkg/github"
 )
 
@@ -14,7 +13,7 @@ type Checker struct {
 	config *config.Config
 }
 
-func New(ctx context.Context, client github.Client, config *config.Config) *Checker {
+func NewChecker(client github.Client, config *config.Config) *Checker {
 	return &Checker{
 		client: client,
 		config: config,
@@ -27,12 +26,15 @@ type WIPStatus struct {
 	hasWIPLabel   bool
 }
 
-func (c *Checker) Check(ctx context.Context, event github.Event, ref string) (status WIPStatus, err error) {
+func (w WIPStatus) WIP() bool {
+	return w.hasWIPTitle || w.hasWIPLabel || w.hasWIPCommits
+}
 
-	var pr 
-	status.hasWIPTitle = c.checkPR(pr)
-	status.hasWIPLabel = c.checkLabels(pr)
-	commits, err := c.client.ListCommits(ctx, prNumber)
+func (c *Checker) Check(ctx context.Context, event github.Event) (status WIPStatus, err error) {
+
+	status.hasWIPTitle = c.checkPR(event.PR)
+	status.hasWIPLabel = c.checkLabels(event.PR)
+	commits, err := c.client.ListCommits(ctx, event.PR.Number)
 	if err != nil {
 		return
 	}
@@ -42,13 +44,13 @@ func (c *Checker) Check(ctx context.Context, event github.Event, ref string) (st
 
 func (c *Checker) checkPR(pr github.PullRequest) bool {
 	title := strings.ToLower(pr.Title)
-	if !strings.HasPrefix(pr.Title, c.config.WIPTitle) {
+	if !strings.HasPrefix(title, c.config.WIPTitle) {
 		return false
 	}
 	return true
 }
 
-func (c *Checker) checkCommits(commit []github.Commit) bool {
+func (c *Checker) checkCommits(commits []github.Commit) bool {
 	for _, commit := range commits {
 		if !c.checkCommit(commit) {
 			continue

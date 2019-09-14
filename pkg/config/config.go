@@ -1,6 +1,10 @@
 package config
 
-import "github.com/kelseyhightower/envconfig"
+import (
+	"strings"
+
+	"github.com/kelseyhightower/envconfig"
+)
 
 type Config struct {
 	GithubToken     string `envconfig:"INPUT_TOKEN"`
@@ -19,6 +23,6 @@ func New() (*Config, error) {
 	return conf, envconfig.Process("", conf)
 }
 
-func (c *Config) WIPCommits() string[] {
+func (c *Config) WIPCommits() []string {
 	return strings.Split(c.wipCommits, ",")
 }

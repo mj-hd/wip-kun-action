@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/go-github/v28/github"
 	"golang.org/x/oauth2"
@@ -50,22 +51,40 @@ func (g *GoGithubClient) RemoveLabel(ctx context.Context, pullRequestNumber int,
 	return err
 }
 
-func NewEvent(typ string, data bytes[]) (Event, error) {
+func NewEvent(typ string, data []byte) (Event, error) {
 	event, err := github.ParseWebHook(typ, data)
 	if err != nil {
 		return Event{}, err
 	}
-	switch event.(type) {
+	switch e := event.(type) {
 	case *github.PullRequestEvent:
-		return Event{
-			Type: EEVENT_TYPE_PULL_REQUEST,
-		}, nil
-	case *github.PushEvent:
-		return Event{
-			Type: EEVENT_TYPE_PUSH,
-		}, nil
+		return toPullRequestEvent(e)
 	}
-	return return Event{}, errors.New("github: unsupported event type")
+	return Event{}, errors.New("github: unsupported event type")
+}
+
+func toPullRequestEvent(e *github.PullRequestEvent) (Event, error) {
+	typ, err := toEventType(e.GetAction())
+	return Event{
+		Type: typ,
+		PR:   toPullRequest(e.GetPullRequest()),
+	}, err
+}
+
+func toEventType(action string) (EventType, error) {
+	switch action {
+	case "opened", "reopened":
+		return EVENT_TYPE_OPENED, nil
+	case "edited":
+		return EVENT_TYPE_EDITED, nil
+	case "labeled":
+		return EVENT_TYPE_LABELED, nil
+	case "unlabeled":
+		return EVENT_TYPE_UNLABELED, nil
+	case "synchronized":
+		return EVENT_TYPE_SYNCHRONIZED, nil
+	}
+	return 0, errors.New("github: unsupported pull request event")
 }
 
 func toPullRequests(prs []*github.PullRequest) []PullRequest {

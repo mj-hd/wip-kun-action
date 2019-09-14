@@ -5,9 +5,10 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/mjhd-devlion/wip-kun/pkg/checker"
+	"github.com/mjhd-devlion/wip-kun/pkg/check"
 	"github.com/mjhd-devlion/wip-kun/pkg/config"
 	"github.com/mjhd-devlion/wip-kun/pkg/github"
+	"github.com/mjhd-devlion/wip-kun/pkg/maintain"
 )
 
 func main() {
@@ -30,9 +31,17 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	checker := checker.New(ctx, client)
-	wip, err := checker.Check(ctx, event, conf.GithubRef)
+	checker := check.NewChecker(client, conf)
+	maintainer := maintain.NewMaintainer(client, conf)
+	status, err := checker.Check(ctx, event)
 	if err != nil {
 		panic(err)
+	}
+	err = maintainer.Maintain(ctx, event, status)
+	if err != nil {
+		panic(err)
+	}
+	if status.WIP() {
+		os.Exit(1)
 	}
 }
