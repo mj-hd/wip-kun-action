@@ -49,7 +49,7 @@ func (m *Maintainer) maintainOpened(ctx context.Context, pr github.PullRequest, 
 			}
 		}
 		if !status.HasWIPLabel {
-			if err := m.addTitle(ctx, pr); err != nil {
+			if err := m.addLabel(ctx, pr); err != nil {
 				return err
 			}
 		}
@@ -127,7 +127,7 @@ func (m *Maintainer) maintainSynchronized(ctx context.Context, pr github.PullReq
 			}
 		}
 		if !status.HasWIPLabel {
-			if err := m.addTitle(ctx, pr); err != nil {
+			if err := m.addLabel(ctx, pr); err != nil {
 				return err
 			}
 		}
