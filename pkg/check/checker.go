@@ -21,24 +21,24 @@ func NewChecker(client github.Client, config *config.Config) *Checker {
 }
 
 type WIPStatus struct {
-	hasWIPTitle   bool
-	hasWIPCommits bool
-	hasWIPLabel   bool
+	HasWIPTitle   bool
+	HasWIPCommits bool
+	HasWIPLabel   bool
 }
 
 func (w WIPStatus) WIP() bool {
-	return w.hasWIPTitle || w.hasWIPLabel || w.hasWIPCommits
+	return w.HasWIPTitle || w.HasWIPLabel || w.HasWIPCommits
 }
 
 func (c *Checker) Check(ctx context.Context, event github.Event) (status WIPStatus, err error) {
 
-	status.hasWIPTitle = c.checkPR(event.PR)
-	status.hasWIPLabel = c.checkLabels(event.PR)
+	status.HasWIPTitle = c.checkPR(event.PR)
+	status.HasWIPLabel = c.checkLabels(event.PR)
 	commits, err := c.client.ListCommits(ctx, event.PR.Number)
 	if err != nil {
 		return
 	}
-	status.hasWIPCommits = c.checkCommits(commits)
+	status.HasWIPCommits = c.checkCommits(commits)
 	return
 }
 
