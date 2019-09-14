@@ -6,10 +6,10 @@ import "context"
 //go:generate mockgen -source=./github.go -package=mock -destination=./mock/mock.go
 
 type Client interface {
-	ListPullRequestsWithCommit(ctx context.Context, sha string) ([]PullRequest, error)
-	ListCommits(ctx context.Context, pullRequestNumber int) ([]Commit, error)
-	AddLabel(ctx context.Context, pullRequestNumber int, label Label) error
-	RemoveLabel(ctx context.Context, pullRequestNumber int, label Label) error
+	ListCommits(ctx context.Context, prNumber int) ([]Commit, error)
+	AddLabel(ctx context.Context, prNumber int, label Label) error
+	RemoveLabel(ctx context.Context, prNumber int, label Label) error
+	UpdatePullRequestTitle(ctx context.Context, prNumber int, title string) error
 }
 
 type Label struct {
@@ -23,7 +23,6 @@ type PullRequest struct {
 }
 
 type Commit struct {
-	SHA     string
 	Message string
 }
 

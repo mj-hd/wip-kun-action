@@ -25,29 +25,28 @@ func NewGoGithub(ctx context.Context, token, owner, repo string) Client {
 	}
 }
 
-func (g *GoGithubClient) ListPullRequestsWithCommit(ctx context.Context, sha string) ([]PullRequest, error) {
-	prs, _, err := g.client.PullRequests.ListPullRequestsWithCommit(ctx, g.owner, g.repo, sha, nil)
-	if err != nil {
-		return nil, err
-	}
-	return toPullRequests(prs), nil
-}
-
-func (g *GoGithubClient) ListCommits(ctx context.Context, pullRequestNumber int) ([]Commit, error) {
-	commits, _, err := g.client.PullRequests.ListCommits(ctx, g.owner, g.repo, pullRequestNumber, nil)
+func (g *GoGithubClient) ListCommits(ctx context.Context, prNumber int) ([]Commit, error) {
+	commits, _, err := g.client.PullRequests.ListCommits(ctx, g.owner, g.repo, prNumber, nil)
 	if err != nil {
 		return nil, err
 	}
 	return toCommits(commits), nil
 }
 
-func (g *GoGithubClient) AddLabel(ctx context.Context, pullRequestNumber int, label Label) error {
-	_, _, err := g.client.Issues.AddLabelsToIssue(ctx, g.owner, g.repo, pullRequestNumber, []string{label.Name})
+func (g *GoGithubClient) AddLabel(ctx context.Context, prNumber int, label Label) error {
+	_, _, err := g.client.Issues.AddLabelsToIssue(ctx, g.owner, g.repo, prNumber, []string{label.Name})
 	return err
 }
 
-func (g *GoGithubClient) RemoveLabel(ctx context.Context, pullRequestNumber int, label Label) error {
-	_, err := g.client.Issues.RemoveLabelForIssue(ctx, g.owner, g.repo, pullRequestNumber, label.Name)
+func (g *GoGithubClient) RemoveLabel(ctx context.Context, prNumber int, label Label) error {
+	_, err := g.client.Issues.RemoveLabelForIssue(ctx, g.owner, g.repo, prNumber, label.Name)
+	return err
+}
+
+func (g *GoGithubClient) UpdatePullRequestTitle(ctx context.Context, prNumber int, title string) error {
+	_, _, err := g.client.PullRequests.Edit(ctx, g.owner, g.repo, prNumber, *github.PullRequest{
+		Title: &title,
+	})
 	return err
 }
 
@@ -125,7 +124,6 @@ func toCommits(commits []*github.RepositoryCommit) []Commit {
 
 func toCommit(commit *github.RepositoryCommit) Commit {
 	return Commit{
-		SHA:     commit.Commit.GetSHA(),
 		Message: commit.Commit.GetMessage(),
 	}
 }

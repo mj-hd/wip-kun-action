@@ -11,10 +11,6 @@ inputs:
   repo:
     description: github repository name
     required: true
-  targets:
-   description: target to watch changes
-   required: false
-   default: 'label,title,commits'
   label:
     description: name of WIP Label
     required: false

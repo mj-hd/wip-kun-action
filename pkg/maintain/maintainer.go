@@ -92,9 +92,11 @@ func (m *Maintainer) removeLabel(ctx context.Context, pr github.PullRequest) err
 }
 
 func (m *Maintainer) addTitle(ctx context.Context, pr github.PullRequest) error {
-	return errors.New("TODO: not implemented yet")
+	title := m.config.WIPTitle + pr.Title
+	return m.client.UpdatePullRequestTitle(ctx, pr.Number, title)
 }
 
 func (m *Maintainer) removeTitle(ctx context.Context, pr github.PullRequest) error {
-	return errors.New("TODO: not implemented yet")
+	title := pr.Title[len(m.config.WIPTitle):]
+	return m.client.UpdatePullRequestTitle(ctx, pr.Number, title)
 }
