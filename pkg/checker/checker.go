@@ -24,7 +24,7 @@ func New(ctx context.Context, client github.Client, sha string) (*Checker, error
 	}, nil
 }
 
-func (c *Checker) Check(ctx context.Context) error {
+func (c *Checker) Check(ctx context.Context, diff string) error {
 	if err := c.checkPR(); err != nil {
 		return err
 	}
