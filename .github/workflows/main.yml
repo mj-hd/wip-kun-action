@@ -2,8 +2,6 @@ name: WIP君
 
 on:
   pull_request:
-    branches:
-      - '!master'
     types: [labeled,unlabeled,opened,edited,reopened,synchronize]
 
 jobs:
