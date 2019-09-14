@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/go-github/v28/github"
 	"golang.org/x/oauth2"
@@ -44,7 +45,7 @@ func (g *GoGithubClient) RemoveLabel(ctx context.Context, prNumber int, label La
 }
 
 func (g *GoGithubClient) UpdatePullRequestTitle(ctx context.Context, prNumber int, title string) error {
-	_, _, err := g.client.PullRequests.Edit(ctx, g.owner, g.repo, prNumber, *github.PullRequest{
+	_, _, err := g.client.PullRequests.Edit(ctx, g.owner, g.repo, prNumber, &github.PullRequest{
 		Title: &title,
 	})
 	return err
@@ -80,10 +81,10 @@ func toEventType(action string) (EventType, error) {
 		return EVENT_TYPE_LABELED, nil
 	case "unlabeled":
 		return EVENT_TYPE_UNLABELED, nil
-	case "synchronized":
+	case "synchronize":
 		return EVENT_TYPE_SYNCHRONIZED, nil
 	}
-	return 0, errors.New("github: unsupported pull request event")
+	return 0, fmt.Errorf("github: unsupported pull request event %s", action)
 }
 
 func toPullRequests(prs []*github.PullRequest) []PullRequest {
