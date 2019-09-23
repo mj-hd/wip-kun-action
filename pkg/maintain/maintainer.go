@@ -43,60 +43,28 @@ func (m *Maintainer) Maintain(ctx context.Context, event github.Event, status ch
 	return f(ctx, event, status)
 }
 
-// TODO simplify
 func (m *Maintainer) maintainOpened(ctx context.Context, e github.Event, status check.WIPStatus) error {
 	if status.WIP() {
-		if !status.HasWIPTitle {
-			if err := m.addTitle(ctx, e.PR); err != nil {
-				return err
-			}
-		}
-		if !status.HasWIPLabel {
-			if err := m.addLabel(ctx, e.PR); err != nil {
-				return err
-			}
-		}
-		return nil
+		return m.wip(ctx, e, status)
 	}
-	if status.HasWIPTitle {
-		if err := m.removeTitle(ctx, e.PR); err != nil {
-			return err
-		}
-	}
-	if status.HasWIPLabel {
-		if err := m.removeLabel(ctx, e.PR); err != nil {
-			return err
-		}
-	}
-	return nil
+	return m.unwip(ctx, e, status)
 }
 
 func (m *Maintainer) maintainEdited(ctx context.Context, e github.Event, status check.WIPStatus) error {
 	if e.ChangedTitle == nil {
 		return nil
 	}
-	if status.HasWIPTitle {
-		if !status.HasWIPLabel {
-			return m.addLabel(ctx, e.PR)
-		}
-		return nil
+	if status.HasWIPCommits || status.HasWIPTitle {
+		return m.wip(ctx, e, status)
 	}
-	if status.HasWIPCommits {
-		return m.reject(ctx, e, status)
-	}
-	return m.removeLabel(ctx, e.PR)
+	return m.unwip(ctx, e, status)
 }
 
 func (m *Maintainer) maintainLabeled(ctx context.Context, e github.Event, status check.WIPStatus) error {
 	if e.ChangedLabel == nil || e.ChangedLabel.Name != m.config.WIPLabel {
 		return nil
 	}
-	if !status.HasWIPTitle {
-		if err := m.addTitle(ctx, e.PR); err != nil {
-			return err
-		}
-	}
-	return nil
+	return m.wip(ctx, e, status)
 }
 
 func (m *Maintainer) maintainUnlabeled(ctx context.Context, e github.Event, status check.WIPStatus) error {
@@ -104,16 +72,31 @@ func (m *Maintainer) maintainUnlabeled(ctx context.Context, e github.Event, stat
 		return nil
 	}
 	if status.HasWIPCommits {
-		return m.reject(ctx, e, status)
+		return m.wip(ctx, e, status)
 	}
-	return m.removeTitle(ctx, e.PR);
+	return m.unwip(ctx, e, status)
 }
 
 func (m *Maintainer) maintainSynchronized(ctx context.Context, e github.Event, status check.WIPStatus) error {
-	return m.maintainOpened(ctx, e, status)
+	if status.HasWIPCommits {
+		return m.wip(ctx, e, status)
+	}
+	return m.unwip(ctx, e, status)
 }
 
-func (m *Maintainer) reject(ctx context.Context, e github.Event, status check.WIPStatus) error {
+func (m *Maintainer) unwip(ctx context.Context, e github.Event, status check.WIPStatus) error {
+	if status.HasWIPLabel {
+		if err := m.removeLabel(ctx, e.PR); err != nil {
+			return err
+		}
+	}
+	if status.HasWIPTitle {
+		return m.removeTitle(ctx, e.PR)
+	}
+	return nil
+}
+
+func (m *Maintainer) wip(ctx context.Context, e github.Event, status check.WIPStatus) error {
 	if !status.HasWIPLabel {
 		if err := m.addLabel(ctx, e.PR); err != nil {
 			return err

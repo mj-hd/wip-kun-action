@@ -14,7 +14,7 @@ type Config struct {
 	GithubOwner     string `envconfig:"INPUT_OWNER"`
 	WIPLabel        string `envconfig:"INPUT_LABEL"`
 	WIPTitle        string `envconfig:"INPUT_TITLE"`
-	wipCommits      string `envconfig:"INPUT_COMMITS"`
+	WIPCommits      string `envconfig:"INPUT_COMMITS"`
 }
 
 func New() (*Config, error) {
@@ -22,6 +22,6 @@ func New() (*Config, error) {
 	return conf, envconfig.Process("", conf)
 }
 
-func (c *Config) WIPCommits() []string {
-	return strings.Split(c.wipCommits, ",")
+func (c *Config) ParseWIPCommits() []string {
+	return strings.Split(c.WIPCommits, ",")
 }

@@ -68,10 +68,10 @@ func toPullRequestEvent(e *github.PullRequestEvent) (event Event, err error) {
 	event.Type, err = toEventType(e.GetAction())
 	if e.GetLabel() != nil {
 		label := toLabel(e.GetLabel())
-		event.Label = &label
+		event.ChangedLabel = &label
 	}
 	if e.GetChanges() != nil && e.GetChanges().Title != nil {
-		event.Title = e.GetChanges().Title.From
+		event.ChangedTitle = e.GetChanges().Title.From
 	}
 	return
 }

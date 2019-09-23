@@ -34,60 +34,59 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 	return m.recorder
 }
 
-// ListPullRequestsWithCommit mocks base method
-func (m *MockClient) ListPullRequestsWithCommit(ctx context.Context, sha string) ([]github.PullRequest, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListPullRequestsWithCommit", ctx, sha)
-	ret0, _ := ret[0].([]github.PullRequest)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListPullRequestsWithCommit indicates an expected call of ListPullRequestsWithCommit
-func (mr *MockClientMockRecorder) ListPullRequestsWithCommit(ctx, sha interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListPullRequestsWithCommit", reflect.TypeOf((*MockClient)(nil).ListPullRequestsWithCommit), ctx, sha)
-}
-
 // ListCommits mocks base method
-func (m *MockClient) ListCommits(ctx context.Context, pullRequestNumber int) ([]github.Commit, error) {
+func (m *MockClient) ListCommits(ctx context.Context, prNumber int) ([]github.Commit, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListCommits", ctx, pullRequestNumber)
+	ret := m.ctrl.Call(m, "ListCommits", ctx, prNumber)
 	ret0, _ := ret[0].([]github.Commit)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ListCommits indicates an expected call of ListCommits
-func (mr *MockClientMockRecorder) ListCommits(ctx, pullRequestNumber interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) ListCommits(ctx, prNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListCommits", reflect.TypeOf((*MockClient)(nil).ListCommits), ctx, pullRequestNumber)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListCommits", reflect.TypeOf((*MockClient)(nil).ListCommits), ctx, prNumber)
 }
 
 // AddLabel mocks base method
-func (m *MockClient) AddLabel(ctx context.Context, pullRequestNumber int, label github.Label) error {
+func (m *MockClient) AddLabel(ctx context.Context, prNumber int, label github.Label) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddLabel", ctx, pullRequestNumber, label)
+	ret := m.ctrl.Call(m, "AddLabel", ctx, prNumber, label)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AddLabel indicates an expected call of AddLabel
-func (mr *MockClientMockRecorder) AddLabel(ctx, pullRequestNumber, label interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) AddLabel(ctx, prNumber, label interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddLabel", reflect.TypeOf((*MockClient)(nil).AddLabel), ctx, pullRequestNumber, label)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddLabel", reflect.TypeOf((*MockClient)(nil).AddLabel), ctx, prNumber, label)
 }
 
 // RemoveLabel mocks base method
-func (m *MockClient) RemoveLabel(ctx context.Context, pullRequestNumber int, label github.Label) error {
+func (m *MockClient) RemoveLabel(ctx context.Context, prNumber int, label github.Label) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RemoveLabel", ctx, pullRequestNumber, label)
+	ret := m.ctrl.Call(m, "RemoveLabel", ctx, prNumber, label)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RemoveLabel indicates an expected call of RemoveLabel
-func (mr *MockClientMockRecorder) RemoveLabel(ctx, pullRequestNumber, label interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) RemoveLabel(ctx, prNumber, label interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveLabel", reflect.TypeOf((*MockClient)(nil).RemoveLabel), ctx, pullRequestNumber, label)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveLabel", reflect.TypeOf((*MockClient)(nil).RemoveLabel), ctx, prNumber, label)
+}
+
+// UpdatePullRequestTitle mocks base method
+func (m *MockClient) UpdatePullRequestTitle(ctx context.Context, prNumber int, title string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdatePullRequestTitle", ctx, prNumber, title)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdatePullRequestTitle indicates an expected call of UpdatePullRequestTitle
+func (mr *MockClientMockRecorder) UpdatePullRequestTitle(ctx, prNumber, title interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePullRequestTitle", reflect.TypeOf((*MockClient)(nil).UpdatePullRequestTitle), ctx, prNumber, title)
 }

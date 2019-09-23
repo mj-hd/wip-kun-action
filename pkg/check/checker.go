@@ -59,7 +59,8 @@ func (c *Checker) checkCommits(commits []github.Commit) bool {
 
 func (c *Checker) checkCommit(commit github.Commit) bool {
 	message := strings.ToLower(commit.Message)
-	for _, prefix := range c.config.WIPCommits() {
+	wipCommits := c.config.ParseWIPCommits()
+	for _, prefix := range wipCommits {
 		if !strings.HasPrefix(message, strings.ToLower(prefix)) {
 			continue
 		}
