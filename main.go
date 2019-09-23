@@ -37,11 +37,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	err = maintainer.Maintain(ctx, event, status)
+	wip, err := maintainer.Maintain(ctx, event, status)
 	if err != nil {
 		panic(err)
 	}
-	if status.WIP() {
+	if wip {
 		os.Exit(1)
 	}
 }

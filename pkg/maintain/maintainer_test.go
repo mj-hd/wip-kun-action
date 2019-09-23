@@ -23,6 +23,7 @@ func TestMaintainerMaintain(t *testing.T) {
 		setup  func(m *mock.MockClient)
 		event  github.Event
 		status check.WIPStatus
+		expect bool
 	}{
 		"opened with WIP commits": {
 			setup: func(m *mock.MockClient) {
@@ -42,6 +43,7 @@ func TestMaintainerMaintain(t *testing.T) {
 			status: check.WIPStatus{
 				HasWIPCommits: true,
 			},
+			expect: true,
 		},
 		"opened with WIP title": {
 			setup: func(m *mock.MockClient) {
@@ -60,6 +62,7 @@ func TestMaintainerMaintain(t *testing.T) {
 			status: check.WIPStatus{
 				HasWIPTitle: true,
 			},
+			expect: true,
 		},
 		"opened with WIP label": {
 			setup: func(m *mock.MockClient) {
@@ -79,6 +82,7 @@ func TestMaintainerMaintain(t *testing.T) {
 			status: check.WIPStatus{
 				HasWIPLabel: true,
 			},
+			expect: true,
 		},
 		"edited unrelated field": {
 			setup: func(m *mock.MockClient) {
@@ -109,6 +113,7 @@ func TestMaintainerMaintain(t *testing.T) {
 			status: check.WIPStatus{
 				HasWIPTitle: true,
 			},
+			expect: true,
 		},
 		"edited title with not WIP": {
 			setup: func(m *mock.MockClient) {
@@ -159,6 +164,7 @@ func TestMaintainerMaintain(t *testing.T) {
 			status: check.WIPStatus{
 				HasWIPLabel: true,
 			},
+			expect: true,
 		},
 		"unrelated unlabeled": {
 			setup: func(m *mock.MockClient) {
@@ -211,6 +217,7 @@ func TestMaintainerMaintain(t *testing.T) {
 			status: check.WIPStatus{
 				HasWIPCommits: true,
 			},
+			expect: true,
 		},
 		"synchronized without WIP commits": {
 			setup: func(m *mock.MockClient) {
@@ -245,8 +252,9 @@ func TestMaintainerMaintain(t *testing.T) {
 			m := mock.NewMockClient(c)
 			testcase.setup(m)
 			maintainer := NewMaintainer(m, config)
-			err := maintainer.Maintain(ctx, testcase.event, testcase.status)
+			wip, err := maintainer.Maintain(ctx, testcase.event, testcase.status)
 			require.NoError(t, err)
+			require.Equal(t, testcase.expect, wip)
 		}
 		t.Run(title, test)
 	}
